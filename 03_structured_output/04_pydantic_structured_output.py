@@ -1,20 +1,19 @@
+from pydantic import BaseModel, Field
+from typing import Literal
 from langchain_google_genai import ChatGoogleGenerativeAI
-from typing import Annotated, Optional, Literal, TypedDict
 from dotenv import load_dotenv
-
-load_dotenv()
 
 model= ChatGoogleGenerativeAI(
     model="gemini-2.5-flash"
 )
 
-class Review(TypedDict):
-    key_themes: Annotated[list[str], "Write all the key theemes in the form of list"]
-    summary: Annotated[str, "Write a brief summary from the review"]
-    sentiment: Annotated[Literal["pos", "neg"], "Return sentiment of the review either negative, positive or neutral"]
-    pros: Annotated[Optional[list[str]], "Write down all the pros inside a list"]
-    cons: Annotated[Optional[list[str]], "Write down all the cons inside a list"]
-    name: Annotated[Optional[str], "Extract ONLY the reviewer's personal name. Do NOT return the product name, company name, or brand. If no reviewer name is mentioned, return null."]
+class Review(BaseModel):
+    key_themes: list[str]= Field(description="Write all the key theemes in the form of list")
+    summary: str = Field(description="Write a brief summary from the review")
+    sentiment: Literal["pos", "neg"]= Field(description="Return sentiment of the review either negative or positive")
+    pros: list[str]= Field(default=None, description="Write down all the pros inside a list")
+    cons: list[str]= Field(default=None, description="Write down all the cons inside a list")
+    name: str= Field(default=None, description="Extract ONLY the reviewer's personal name. Do NOT return the product name, company name, or brand. If no reviewer name is mentioned, return None.")
 
 structured_model= model.with_structured_output(Review)
 
@@ -35,4 +34,4 @@ Review by Nitish Singh
 
 print(result)
 print(type(result))
-print(result['name'])
+print(result.name)
